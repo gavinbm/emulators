@@ -37,7 +37,7 @@ uint8_t dt              = 0;      // delay timer, ^
 uint8_t sp              = 0;      // stack pointer, points to the top of the stack
 uint16_t pc             = 0x200;  // program counter, points to address of current instruction, programs start at 0x200 (see memory map)
 uint16_t stack[16]      = {0};    // stores subroutine return addresses
-uint16_t I             = 0;      // special register, generally for memory addresses, usually only uses lowest 12 bits.
+uint16_t I              = 0;      // special register, generally for memory addresses, usually only uses lowest 12 bits.
 
 // font sprites
 uint8_t fontsprites[80] = {
