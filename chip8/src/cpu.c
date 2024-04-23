@@ -55,7 +55,12 @@ int exec_ins() {
     switch (ins & 0xFF) { // ins & 0xFF extracts the opcode from the instruction
     case 0x0:
         if ((ins & 0x000F) == 0x0) {
-            // TODO: clear display
+            // just iterate over the display and set everything to 0
+            for (int i = 0; i < 32; i++) {
+                for (int k = 0; k < 64; k++) {
+                    display[i][k] = 0;
+                }
+            }
         } 
         else if ((ins & 0x000F) == 0xE) {
             pc = stack[sp];
@@ -234,7 +239,7 @@ int exec_ins() {
             I += V[x];
             break;
         case 0x29:
-            I = V[x] * 5; // TODO: fact check
+            I = V[x] * 5; // this works because each sprite is 5 bytes long in memory and we load them in starting at memory[0]
             break;
         case 0x33:
             memory[I]     = (V[x] / 100) % 10;
