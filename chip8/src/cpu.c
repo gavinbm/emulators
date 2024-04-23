@@ -1,4 +1,4 @@
-#include "chip8.h"
+#include "../inc/chip8.h"
 
 /*
     Memory Map:
@@ -48,6 +48,7 @@ int exec_ins() {
     uint16_t ins = memory[pc] << 8 | memory[pc++];
     int x   = ins & 0x0F00; 
     int y   = ins & 0x00F0;
+    int n   = ins & 0x000F;
     int kk  = ins & 0x00FF;
     int nnn = ins & 0x0FFF;
 
@@ -166,7 +167,51 @@ int exec_ins() {
         V[x] = (rand() % 256) & kk;
         break;
     case 0xD:
-        // TODO: draw instruction
+        /*
+            This instruction was confusing as fuck for me and I had to read code for it here (https://github.com/f0lg0/CHIP-8/blob/main/src/chip8.c)
+            In order to cement my own understanding, I'm gonna write out some pesudocode to try to explain the way this instruction works.
+            The instruction is in the format Dxyn where:
+            D = opcode, duh
+            x = V[x] register for the x coordinate of where we're drawing the sprite
+            y = V[y] register for the y coordinate of where we're drawing the sprite
+            n = the number of bytes the sprite takes up in memory (aka how tall the sprite is, they're ALWAYS 8 bits wide)
+            * we start reading the sprite out of memory starting from the address stored in the I register
+
+            To make this happen, we:
+            1) Grab the byte out of memory[I]
+            2) Scan through each bit in that byte, lighting up display pixels whenever we see a 1
+                a) This requires some bitwise magic (which I'm pretty bad at as of writing this).
+                   You can walk through a number bit by bit (haha) by:
+                        1) AND it with 0x80
+                        2) shift 0x80 right by 1 until you get 0
+                        * helpful explanation found here (https://stackoverflow.com/questions/4465488/how-to-go-through-each-bit-of-a-byte)
+            3) If the pixel we're trying to light up is already lit and being overwritten, we set V[0x0F] to 1 to represent collision
+            4) XOR the byte info onto the pixel (only bother if we're lighting something up)
+            5) Repeat above steps for memory[I + 1] until we hit memory[I + n]
+        */
+        uint8_t byte;
+        uint8_t sprite_height = n;
+        V[0x0F] = 0;
+
+        // iterating over n memory spaces starting at memory[I]
+        for (int i = 0; i < n; i++) {
+
+            byte = memory[I + i];
+
+            // iterate over each bit in the byte read at memory[I + i]
+            for (int j = 0; j < 8; j++) {
+
+                // check if the current sprite bit is a 1
+                if (byte & (0x80 >> j)) {
+                    // check if the display bit we're going to change is already on
+                    if (display[V[y] + i][V[x] + j] == 1)
+                        V[0x0F] = 1; // set collision
+
+                    // XOR our sprite info onto the screen
+                    display[V[y] + i][V[x] + j] ^= 1;
+                }
+            }
+        }
         break;
     case 0xE:
         // TODO: needs keyboard implementation
@@ -233,11 +278,18 @@ int main(int argc, char *argv[]) {
     //     usleep(1500);
     // }
 
-    int a = 0x2A3D;
-    int b = 20;
-    uint8_t c = 254;
+    unsigned char val = 26;  // or whatever
 
-    printf("[%d] -- [%d] -- [%x] -- [%x]\n", 0x1, 0x0001, a & 0x000F, ((a & 0x000F) == 0x000D));
+    unsigned int mask;
 
+    for (mask = 0x80; mask != 0; mask >>= 1) {
+        printf("[%x] -- [%d] -- [%x] -- [%d]\n", val & mask, val & mask, mask, mask);
+        if (val & mask) {
+            // bit is 1
+        }
+        else {
+            // bit is 0
+        }
+    }
     return 0;
 }
