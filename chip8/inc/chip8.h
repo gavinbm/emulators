@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 
-uint8_t memory[4096]    = {0};
+uint8_t memory[4096]    = {0};    // memory
 uint8_t V[16]           = {0};    // general purpose registers, named "V" to represent that registers are named "Vx" where x is just a hex value
 uint8_t st              = 0;      // sound timer, when != 0, decremented at 60Hz
 uint8_t dt              = 0;      // delay timer, ^
@@ -14,7 +14,10 @@ uint16_t pc             = 0x200;  // program counter, points to address of curre
 uint16_t stack[16]      = {0};    // stores subroutine return addresses
 uint16_t I              = 0;      // special register, generally for memory addresses, usually only uses lowest 12 bits.
 
-uint8_t display[32][64];          // matrix that represents the display
+int keyboard[16] = {0};           // array to represent the keyboard
+int keydown = 0;                  // var to track if a key is pressed
+
+uint8_t display[32][64] = {0};    // matrix that represents the display
 
 // font sprites
 uint8_t fontsprites[80] = {
