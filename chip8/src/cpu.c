@@ -27,7 +27,6 @@
 */
 
 void init_cpu() {
-
     memcpy(memory, fontsprites, sizeof(fontsprites));
 }
 
@@ -40,11 +39,12 @@ int load_rom(char *filename) {
         printf("Could not read file [%s]...\n", filename);
         exit(1);
     }
-    
 }
 
 void exec_ins() {
-
+    // 0nnn
+    //3xkk
+    //5xy0
     uint16_t ins = memory[pc] << 8 | memory[pc++];
     int opcode   = ins & 0xFF;
     int x   = ins & 0x0F00; 
@@ -52,6 +52,8 @@ void exec_ins() {
     int n   = ins & 0x000F;
     int kk  = ins & 0x00FF;
     int nnn = ins & 0x0FFF;
+
+    int xpos, ypos, curr_bit;
 
     printf("[%x]\n", ins);
     return;
@@ -176,6 +178,30 @@ void exec_ins() {
             pc += 2;
             break;
         case 0xD:
+            V[0xF] = 0;
+            xpos = V[x] % DISPLAY_WIDTH;
+            ypos = V[y] % DISPLAY_HEIGHT;
+            for (int i = 0; i < n; i++)
+            {
+                for (int k = 0; k < 8; k++)
+                {
+                    curr_bit = (memory[I + i] >> k) & 1;
+                    if (display[ypos][xpos] && curr_bit)
+                    {
+                        V[0xF] = 1;
+                        display[ypos][xpos] = 0;
+                    }
+                    else if (!display[ypos][xpos] && curr_bit)
+                    {
+                        display[ypos][xpos] = 1;
+                    }
+                    // might have to check xpos to stop execution
+                    xpos++;
+                }
+                // might have to check xpos to stop execution
+                ypos++;
+            }
+            pc += 2;
             break;
         case 0xE:
             if (kk == 0x9E)
@@ -240,6 +266,24 @@ void exec_ins() {
             printf("wtf is [%x]?\n", ins);
             exit(ins);
             break;
+    }
+}
+
+void print_display()
+{
+    for (int i = 0; i < DISPLAY_HEIGHT; i++)
+    {
+        for (int k = 0; k < DISPLAY_WIDTH; k++) {
+            if (display[i][k] == 1)
+            {
+                printf("*");
+            }
+            else
+            {
+                printf(" ");
+            }
+        }
+        puts("");
     }
 }
 

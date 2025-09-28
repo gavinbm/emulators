@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
+
+#define DISPLAY_HEIGHT 32
+#define DISPLAY_WIDTH 64
 
 uint8_t memory[4096]    = {0};    // memory
 uint8_t V[16]           = {0};    // general purpose registers, named "V" to represent that registers are named "Vx" where x is just a hex value
@@ -17,7 +21,7 @@ uint16_t I              = 0;      // special register, generally for memory addr
 int keyboard[16] = {0};           // array to represent the keyboard
 int keydown = 0;                  // var to track if a key is pressed
 
-uint8_t display[32][64] = {0};    // matrix that represents the display
+uint8_t display[DISPLAY_HEIGHT][DISPLAY_WIDTH] = {0};    // matrix that represents the display
 
 // font sprites
 uint8_t fontsprites[80] = {
