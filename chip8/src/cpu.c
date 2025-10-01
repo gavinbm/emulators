@@ -42,9 +42,7 @@ int load_rom(char *filename) {
 }
 
 void exec_ins() {
-    // 0nnn
-    //3xkk
-    //5xy0
+
     uint16_t ins = memory[pc] << 8 | memory[pc++];
     int opcode   = ins & 0xFF;
     int x   = ins & 0x0F00; 
@@ -54,9 +52,6 @@ void exec_ins() {
     int nnn = ins & 0x0FFF;
 
     int xpos, ypos, curr_bit;
-
-    printf("[%x]\n", ins);
-    return;
 
     switch (opcode) {
         case 0x0:
@@ -291,15 +286,58 @@ int main(int argc, char *argv[]) {
     srand(time(NULL));
     int running = 1;
     char *input = argv[1];
+
+    SDL_Event event;
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
+
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(64*10, 32*10, 0, &window, &renderer);
+    SDL_RenderSetScale(renderer, 10, 10);
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     
     if (!load_rom(input)) {
         printf("Read nothing from [%s]...\n", input);
         return 1;
     }
 
-    while (memory[pc] != 0) {
+    while (running) {
+        //printf("[%d] -- [%x]\n", pc, memory[pc]);
+        while (SDL_PollEvent(&event) != 0) {
+            // User requests quit
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            }
+        }
+        
+        int start = SDL_GetPerformanceCounter();
+        
         exec_ins();
+        for (int h = 0; h < DISPLAY_HEIGHT; h++)
+        {
+            for (int w = 0; w < DISPLAY_WIDTH; w++)
+            {
+                if (display[h][w])
+                {
+                    SDL_RenderDrawPoint(renderer, 64/2, 32/2);
+                }
+            }
+        }
+        SDL_RenderPresent(renderer);
+
+        int end = SDL_GetPerformanceCounter();
+        double frequency = (double) SDL_GetPerformanceFrequency();
+        double elapsed_time = ((end - start) * 1000) / frequency;
+        if (elapsed_time < CLOCK_PERIOD)
+            SDL_Delay((int) (CLOCK_PERIOD - elapsed_time));
     }
 
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }

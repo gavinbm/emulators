@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -8,6 +9,7 @@
 
 #define DISPLAY_HEIGHT 32
 #define DISPLAY_WIDTH 64
+#define CLOCK_PERIOD 16.666f
 
 uint8_t memory[4096]    = {0};    // memory
 uint8_t V[16]           = {0};    // general purpose registers, named "V" to represent that registers are named "Vx" where x is just a hex value
